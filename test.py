@@ -3,6 +3,3 @@
 config = Config()
 config.write()
 
-
-
-
