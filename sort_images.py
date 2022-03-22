@@ -17,8 +17,8 @@ if not(args.work_dir):
     parser.print_usage()
     sys.exit(1)
 work_dir = os.path.abspath(args.work_dir[0]) if args.work_dir[0] else os.path.abspath(".")
-dest_dir = os.path.abspath(args.dest) if args.dest else os.path.abspath("sorted")
-final_dir = os.path.abspath(args.final) if args.final else os.path.abspath("final")
+dest_dir = os.path.abspath(args.dest) if args.dest else os.path.abspath("./sorted")
+final_dir = os.path.abspath(args.final) if args.final else os.path.abspath("./final")
 process_dir = os.path.abspath(f"./process")
 final_type = args.type or 'dark'
 flat_name = os.path.abspath(args.flat) if args.final else None # os.path.abspath(f"../flats/pp_flat_250_0.100_stacked.fit") 
@@ -69,7 +69,8 @@ def light(light_dir, iso, secs, process_dir, flat_name=None):
         output_norm=True,
         out=f"final_{name}_stacked",
     )
-    cmd.savetif(f"final_{name}_stacked")
+    cmd.rmgreen(type=1)
+    # cmd.savetif(f"final_{name}_stacked")
     cmd.close()
 
 from pysiril.siril import *
@@ -113,8 +114,10 @@ def process():
                 clean_dir(process_dir)
                 for name in images[iso][secs]:
                     try:
-                        os.link(f"{work_dir}/{name}", f"{sorted_dir}/{name}")
+                        #print(f"ln -s {work_dir}/{name} {sorted_dir}/{name}")
+                        os.symlink(f"{work_dir}/{name}", f"{sorted_dir}/{name}")
                     except:
+                        print(f"Error: {name}")
                         pass
                 final_name = f"{final_type}_{iso}_{secs}"
                 if final_type == 'dark':
@@ -132,6 +135,7 @@ def process():
                 except:
                     pass
                 os.link(f"{process_dir}/{final_name}_stacked.fit", f"{final_dir}/{final_name}_stacked.fit")
+                #os.link(f"{process_dir}/{final_name}_stacked.tif", f"{final_dir}/{final_name}_stacked.tif")
             except Exception as e:
                 print("********ERROR processing: {sorted_dir}: {e}")
                 pass
